@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
-import Cidade from './Cidade'
+import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Pagar from './Pagar'
 
 export default class Fornecedor extends BaseModel {
@@ -11,9 +10,6 @@ export default class Fornecedor extends BaseModel {
 
   @column({ serializeAs: 'empresaId' })
   public empresaId: number
-
-  @column({ serializeAs: 'cidadeId' })
-  public cidadeId: number
 
   @column()
   public nome: string
@@ -27,17 +23,11 @@ export default class Fornecedor extends BaseModel {
   @column()
   public email: string
 
-  @column({ serializeAs: 'cpfCnpj' })
-  public cpfCnpj: string
-
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
-
-  @belongsTo(() => Cidade)
-  public cidade: BelongsTo<typeof Cidade>
 
   @hasMany(() => Pagar)
   public pagar: HasMany<typeof Pagar>

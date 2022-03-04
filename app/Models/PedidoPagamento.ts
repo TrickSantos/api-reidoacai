@@ -1,12 +1,12 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 
-export default class OrdemPagamento extends BaseModel {
+export default class PedidoPagamento extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @column({ serializeAs: 'ordemServicoId' })
-  public ordemServicoId: number
+  @column({ serializeAs: 'pedidoId' })
+  public pedidoId: number
 
   @column({ serializeAs: 'formaPagamento' })
   public formaPagamento: string

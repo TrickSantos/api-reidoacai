@@ -41,7 +41,6 @@ export default class UsersController {
             password: schema.string(),
             nome: schema.string(),
             cpf: schema.string({}, [rules.unique({ table: 'users', column: 'cpf' })]),
-            image: schema.file.optional({ size: '10mb', extnames: ['jpg', 'png'] }),
           }),
           messages: {
             'email.required': 'O email precisa ser informado',
@@ -50,23 +49,10 @@ export default class UsersController {
             'nome.required': 'O nome precisa ser informado',
             'cpf.required': 'O CPF precisa ser informado',
             'cargoId.exists': 'O cargo não foi encontrado',
-            'image.file.extnames': 'A imagem precisa estar em um formato permitido',
-            'image.file.size': 'A imagem precisa ser menor que 10mb',
           },
         })
         .then(async (data) => {
-          let image = ''
-          if (data.image && data.image.type && data.image.tmpPath) {
-            /* image = await S3.upload(
-              fs.createReadStream(data.image.tmpPath),
-              `${cuid()}.${data.image.extname}`,
-              data.image.type,
-              'users',
-              'authenticated-read'
-            ) */
-          }
-
-          await Users.create({ ...data, image, empresaId: auth.user?.empresaId }).then((user) =>
+          await Users.create({ ...data, empresaId: auth.user?.empresaId }).then((user) =>
             response.status(200).send(user)
           )
         })
@@ -125,17 +111,7 @@ export default class UsersController {
           const { id } = params
 
           await Users.findOrFail(id).then(async (user) => {
-            let image = user.image
-            if (data.image && data.image.type && data.image.tmpPath) {
-              /* image = await S3.upload(
-                fs.createReadStream(data.image.tmpPath),
-                `${cuid()}.${data.image.extname}`,
-                data.image.type,
-                'users',
-                'authenticated-read'
-              ) */
-            }
-            user.merge({ ...data, image })
+            user.merge({ ...data })
             await user.save()
             response.status(200).send(user)
           })

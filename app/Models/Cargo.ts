@@ -20,16 +20,10 @@ export default class Cargo extends BaseModel {
   public nome: string
 
   @column()
-  public pdv: Base
+  public pedidos: Base
 
   @column()
-  public os: Base
-
-  @column()
-  public produtos: Base
-
-  @column()
-  public servicos: Base
+  public adicionais: Base
 
   @column()
   public clientes: Base
@@ -39,9 +33,6 @@ export default class Cargo extends BaseModel {
 
   @column()
   public unidades: Base
-
-  @column()
-  public compras: Base
 
   @column({ serializeAs: 'aPagar' })
   public aPagar: Base

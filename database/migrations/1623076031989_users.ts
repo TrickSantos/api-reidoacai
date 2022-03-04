@@ -17,7 +17,6 @@ export default class UsersSchema extends BaseSchema {
       table.string('remember_me_token').nullable()
       table.string('nome')
       table.string('cpf').unique()
-      table.string('image')
       table.enum('perfil', ['administrador', 'caixa']).defaultTo('caixa')
       table.boolean('status').defaultTo(true)
       table.timestamp('created_at', { useTz: true }).notNullable()

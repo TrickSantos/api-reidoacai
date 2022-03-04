@@ -12,7 +12,6 @@ export default class ClientesController {
             builder.where({ empresaId: user.empresaId })
           }
         })
-        .preload('cidade', (query) => query.preload('uf'))
         .then((clientes) => response.status(200).send(clientes))
     } catch (error) {
       if (error.messages) {
@@ -29,24 +28,11 @@ export default class ClientesController {
         .validate({
           schema: schema.create({
             nome: schema.string(),
-            cnpjCpf: schema.string({}, [
-              rules.unique({ column: 'cnpj_cpf', table: 'clientes' }),
-              rules.maxLength(14),
-            ]),
-            cidadeId: schema.number([rules.exists({ column: 'id', table: 'cidades' })]),
-            razaoSocial: schema.string.optional(),
             email: schema.string({}, [
               rules.email(),
               rules.unique({ table: 'clientes', column: 'email' }),
             ]),
             telefone: schema.string.optional({}, [rules.mobile({ locales: ['pt-BR'] })]),
-            endereco: schema.object.optional().members({
-              bairro: schema.string(),
-              logradouro: schema.string(),
-              numero: schema.string(),
-              complemento: schema.string.optional(),
-              cep: schema.string({}, [rules.maxLength(8)]),
-            }),
           }),
           messages: {
             'nome.required': 'O nome precisa ser informado',
@@ -54,9 +40,6 @@ export default class ClientesController {
             'email.email': 'O email precisa estar em um formato válido',
             'email.unique': 'O email já está em uso, informe outro email',
             'telefone.mobile': 'O telefone precisa estar em um formato válido',
-            'cnpjCpf.unique': 'O CPF/CNPJ já está em uso',
-            'cidadeId.exists': 'A cidade precisa ser informada',
-            'endereco.cep.maxLength': 'Um CEP válido deve ser informado',
           },
         })
         .then(async (data) => {
@@ -79,35 +62,18 @@ export default class ClientesController {
       await request
         .validate({
           schema: schema.create({
-            empresaId: schema.number.optional([rules.exists({ table: 'empresas', column: 'id' })]),
-            cnpjCpf: schema.string.optional({}, [
-              rules.unique({ column: 'cpf_cnpj', table: 'clientes', whereNot: { id: id } }),
-            ]),
-            cidadeId: schema.number.optional([rules.exists({ column: 'id', table: 'cidades' })]),
-            razaoSocial: schema.string.optional(),
             nome: schema.string.optional(),
             email: schema.string.optional({}, [
               rules.email(),
               rules.unique({ table: 'clientes', column: 'email', whereNot: { id: id } }),
             ]),
             telefone: schema.string.optional({}, [rules.mobile({ locales: ['pt-BR'] })]),
-            endereco: schema.object.optional().members({
-              bairro: schema.string(),
-              logradouro: schema.string(),
-              numero: schema.string(),
-              complemento: schema.string.optional(),
-              cep: schema.string({}, [rules.maxLength(8)]),
-            }),
           }),
           messages: {
-            'empresaId': 'A empresa precisa ser informada/válida',
             'nome.required': 'O nome precisa ser informado',
             'email.email': 'O email precisa estar em um formato válido',
             'email.unique': 'O email já está em uso, informe outro email',
             'telefone.mobile': 'O telefone precisa estar em um formato válido',
-            'cnpjCpf.unique': 'O CPF/CNPJ já está em uso',
-            'cidadeId.exists': 'A cidade precisa ser informada',
-            'endereco.cep.maxLength': 'Um CEP válido deve ser informado',
           },
         })
         .then(async (data) => {

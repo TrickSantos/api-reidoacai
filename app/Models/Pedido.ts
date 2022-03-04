@@ -9,11 +9,11 @@ import {
   manyToMany,
   ManyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
-import Servico from './Servico'
+import Adicional from './Adicional'
 import Cliente from './Cliente'
-import OrdemPagamento from './OrdemPagamento'
+import PedidoPagamento from './PedidoPagamento'
 
-export default class OrdemServico extends BaseModel {
+export default class Pedido extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
@@ -24,22 +24,7 @@ export default class OrdemServico extends BaseModel {
   public empresaId: number
 
   @column()
-  public tipo: string
-
-  @column()
-  public etiqueta: string
-
-  @column({ serializeAs: 'produtoAnalise' })
-  public produtoAnalise: string
-
-  @column()
   public observacoes: string
-
-  @column()
-  public problema: string
-
-  @column()
-  public solucao: string
 
   @column()
   public status: string
@@ -47,25 +32,22 @@ export default class OrdemServico extends BaseModel {
   @column()
   public valor: number
 
-  @column()
-  public garantia: number
-
   @column.dateTime()
   public entrega: DateTime
 
-  @manyToMany(() => Servico, {
+  @manyToMany(() => Adicional, {
     localKey: 'id',
-    pivotTable: 'os_servicos',
+    pivotTable: 'pedido_adicionais',
     relatedKey: 'id',
-    pivotForeignKey: 'ordem_servico_id',
-    pivotRelatedForeignKey: 'servico_id',
+    pivotForeignKey: 'pedido_id',
+    pivotRelatedForeignKey: 'adicional_id',
     pivotColumns: ['quantidade', 'desconto'],
     pivotTimestamps: true,
   })
-  public servicos: ManyToMany<typeof Servico>
+  public adicionais: ManyToMany<typeof Adicional>
 
-  @hasMany(() => OrdemPagamento)
-  public pagamento: HasMany<typeof OrdemPagamento>
+  @hasMany(() => PedidoPagamento)
+  public pagamento: HasMany<typeof PedidoPagamento>
 
   @belongsTo(() => Cliente)
   public cliente: BelongsTo<typeof Cliente>

@@ -1,19 +1,19 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import Servico from 'App/Models/Servico'
+import Adicionais from 'App/Models/Adicional'
 
-export default class ServicosController {
+export default class AdicionaisController {
   public async index({ response, auth }: HttpContextContract) {
     const { user } = auth
     try {
-      await Servico.query()
+      await Adicionais.query()
         .where((builder) => {
           if (user) {
             builder.where({ empresaId: user.empresaId })
           }
         })
         .preload('unidade')
-        .then((servicos) => response.status(200).send(servicos))
+        .then((adicionais) => response.status(200).send(adicionais))
     } catch (error) {
       if (error.messages) {
         return response.status(500).send(error.messages)
@@ -29,20 +29,20 @@ export default class ServicosController {
         .validate({
           schema: schema.create({
             unidadeId: schema.number([rules.exists({ table: 'unidades', column: 'id' })]),
-            servico: schema.string(),
+            adicional: schema.string(),
             descricao: schema.string(),
             valor: schema.number(),
           }),
           messages: {
-            servico: 'O serviço precisa ser informado',
-            descricao: 'A descrição do serviço precisa ser informada',
+            adicional: 'O adicional precisa ser informado',
+            descricao: 'A descrição do adicional precisa ser informada',
             unidadeId: 'A unidade precisa ser informada',
             valor: 'O valor precisa ser informado',
           },
         })
         .then(async (data) => {
-          await Servico.create({ ...data, empresaId: auth.user?.empresaId }).then((servico) =>
-            response.status(200).send(servico)
+          await Adicionais.create({ ...data, empresaId: auth.user?.empresaId }).then((adicional) =>
+            response.status(200).send(adicional)
           )
         })
     } catch (error) {
@@ -60,23 +60,23 @@ export default class ServicosController {
         .validate({
           schema: schema.create({
             unidadeId: schema.number.optional([rules.exists({ table: 'unidades', column: 'id' })]),
-            servico: schema.string.optional(),
+            adicional: schema.string.optional(),
             descricao: schema.string.optional(),
             valor: schema.number.optional(),
           }),
           messages: {
-            servico: 'O serviço precisa ser informado',
-            descricao: 'A descrição do serviço precisa ser informada',
+            adicional: 'O adicional precisa ser informado',
+            descricao: 'A descrição do adicional precisa ser informada',
             unidadeId: 'A unidade precisa ser informada',
             valor: 'O valor precisa ser informado',
           },
         })
         .then(async (data) => {
           const { id } = params
-          await Servico.findOrFail(id).then(async (servico) => {
-            servico.merge(data)
-            await servico.save()
-            return response.status(200).send(servico)
+          await Adicionais.findOrFail(id).then(async (adicional) => {
+            adicional.merge(data)
+            await adicional.save()
+            return response.status(200).send(adicional)
           })
         })
     } catch (error) {
@@ -91,8 +91,8 @@ export default class ServicosController {
   public async destroy({ params, response }: HttpContextContract) {
     try {
       const { id } = params
-      await Servico.findOrFail(id).then(async (servico) => {
-        await servico.delete()
+      await Adicionais.findOrFail(id).then(async (adicional) => {
+        await adicional.delete()
         return response.status(200)
       })
     } catch (error) {

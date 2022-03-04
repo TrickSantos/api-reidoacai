@@ -12,7 +12,6 @@ export default class FornecedoresController {
             builder.where({ empresaId: user.empresaId })
           }
         })
-        .preload('cidade', (query) => query.preload('uf'))
         .then((clientes) => response.status(200).send(clientes))
     } catch (error) {
       if (error.messages) {
@@ -29,11 +28,6 @@ export default class FornecedoresController {
         .validate({
           schema: schema.create({
             nome: schema.string(),
-            cpfCnpj: schema.string({}, [
-              rules.unique({ column: 'cpf_cnpj', table: 'fornecedores' }),
-              rules.maxLength(14),
-            ]),
-            cidadeId: schema.number([rules.exists({ column: 'id', table: 'cidades' })]),
             razaoSocial: schema.string.optional(),
             email: schema.string({}, [
               rules.email(),
@@ -47,8 +41,6 @@ export default class FornecedoresController {
             'email.email': 'O email precisa estar em um formato válido',
             'email.unique': 'O email já está em uso, informe outro email',
             'telefone.mobile': 'O telefone precisa estar em um formato válido',
-            'cpfCnpj.unique': 'O CPF/CNPJ já está em uso',
-            'cidadeId.exists': 'A cidade precisa ser informada',
           },
         })
         .then(async (data) => {
@@ -71,11 +63,6 @@ export default class FornecedoresController {
       await request
         .validate({
           schema: schema.create({
-            cpfCnpj: schema.string.optional({}, [
-              rules.unique({ column: 'cpf_cnpj', table: 'fornecedores', whereNot: { id: id } }),
-              rules.maxLength(14),
-            ]),
-            cidadeId: schema.number.optional([rules.exists({ column: 'id', table: 'cidades' })]),
             razaoSocial: schema.string.optional(),
             nome: schema.string.optional(),
             email: schema.string.optional({}, [
@@ -90,8 +77,6 @@ export default class FornecedoresController {
             'email.email': 'O email precisa estar em um formato válido',
             'email.unique': 'O email já está em uso, informe outro email',
             'telefone.mobile': 'O telefone precisa estar em um formato válido',
-            'cpfCnpj.unique': 'O CPF/CNPJ já está em uso',
-            'cidadeId.exists': 'A cidade precisa ser informada',
           },
         })
         .then(async (data) => {

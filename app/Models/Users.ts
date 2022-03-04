@@ -24,9 +24,6 @@ export default class Users extends BaseModel {
   public cpf: string
 
   @column()
-  public image: string
-
-  @column()
   public status: boolean
 
   @column({ serializeAs: 'empresaId' })

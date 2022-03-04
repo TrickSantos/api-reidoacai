@@ -69,7 +69,6 @@ export default class EmpresasController {
               .related('cargos')
               .create({
                 nome: 'Super Admin',
-                pdv: base,
                 aPagar: base,
                 aReceber: base,
                 caixa: base,
@@ -77,12 +76,10 @@ export default class EmpresasController {
                 usuarios: base,
                 cargos: base,
                 clientes: base,
-                compras: base,
                 fornecedores: base,
-                os: base,
+                pedidos: base,
                 unidades: base,
-                servicos: base,
-                produtos: base,
+                adicionais: base,
               })
               .then(async (cargo) => {
                 cargo.useTransaction(trx)
@@ -101,16 +98,6 @@ export default class EmpresasController {
                       .related('clientes')
                       .create({
                         nome: 'Consumidor Final',
-                        endereco: {
-                          bairro: '469SW',
-                          cep: '78000000',
-                          logradouro:
-                            'Av. Rotary Internacional, 469SW, Quadra 35, Lote 06, Sala 01',
-                          numero: '',
-                          complemento: '',
-                        },
-                        cidadeId: 4929,
-                        cnpjCpf: '33333333333333',
                         telefone: '65999999999',
                       })
                       .then(async () => {

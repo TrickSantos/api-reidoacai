@@ -1,19 +1,21 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
-export default class OrdemPagamentos extends BaseSchema {
-  protected tableName = 'ordem_pagamentos'
+export default class Adicionais extends BaseSchema {
+  protected tableName = 'adicionais'
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table
-        .integer('ordem_servico_id')
+        .integer('empresa_id')
         .unsigned()
-        .references('ordem_servicos.id')
+        .references('id')
+        .inTable('empresas')
         .onDelete('cascade')
-      table.enum('forma_pagamento', ['dinheiro', 'credito', 'debito', 'pix', 'prazo']).notNullable()
-      table.integer('parcelas').defaultTo(1)
-      table.decimal('valor').defaultTo(0)
+      table.integer('unidade_id').unsigned().references('id').inTable('unidades')
+      table.string('adicional')
+      table.string('descricao')
+      table.decimal('valor')
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })

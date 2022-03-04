@@ -1,60 +1,47 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import OrdemServico from 'App/Models/OrdemServico'
+import Pedido from 'App/Models/Pedido'
 import Movimentacao from 'App/Models/Movimentacao'
 import Receber from 'App/Models/Receber'
 import { DateTime } from 'luxon'
-import OsServico from 'App/Models/OsServico'
+import PedidoAdicional from 'App/Models/PedidoAdicional'
 import Caixa from 'App/Models/Caixa'
 
-export default class OrdemServicosController {
-  public async index({ response, auth, request }: HttpContextContract) {
+export default class PedidosController {
+  public async index({ response, auth }: HttpContextContract) {
     try {
-      await request
-        .validate({
-          schema: schema.create({
-            tipo: schema.enum(['servico', 'os']),
-          }),
-          messages: {
-            'tipo.required': 'O tipo precisa ser informado',
-            'tipo.enum': 'O tipo precisa ser informado',
-          },
+      const { user } = auth
+      await Pedido.query()
+        .where((builder) => {
+          if (user) {
+            builder.where({ empresaId: user.empresaId })
+          }
         })
-        .then(async ({ tipo }) => {
-          const { user } = auth
-          await OrdemServico.query()
-            .where((builder) => {
-              if (user) {
-                builder.where({ empresaId: user.empresaId })
-              }
-              builder.where({ tipo })
-            })
-            .preload('servicos', (query) => {
-              query.pivotColumns(['desconto', 'quantidade', 'id'])
-              query.preload('unidade')
-            })
-            .preload('cliente')
-            .then((os) => {
-              const ordens = os.map((oServico) => {
-                if (oServico.servicos) {
-                  const temp = oServico.servicos
+        .preload('adicionais', (query) => {
+          query.pivotColumns(['desconto', 'quantidade', 'id'])
+          query.preload('unidade')
+        })
+        .preload('cliente')
+        .then((pedidos) => {
+          const ordens = pedidos.map((pedido) => {
+            if (pedido.adicionais) {
+              const temp = pedido.adicionais
+              return {
+                ...pedido.serialize(),
+                adicionais: temp.map((adicional) => {
                   return {
-                    ...oServico.serialize(),
-                    servicos: temp.map((s) => {
-                      return {
-                        quantidade: s.$extras.pivot_quantidade,
-                        desconto: s.$extras.pivot_desconto,
-                        ordemServicoId: s.$extras.pivot_ordem_servico_id,
-                        servicoId: s.$extras.pivot_servico_id,
-                        id: s.$extras.pivot_id,
-                        servico: s.serialize(),
-                      }
-                    }),
+                    quantidade: adicional.$extras.pivot_quantidade,
+                    desconto: adicional.$extras.pivot_desconto,
+                    pedidoId: adicional.$extras.pivot_pedido_id,
+                    adicionalId: adicional.$extras.pivot_adicional_id,
+                    id: adicional.$extras.pivot_id,
+                    adicional: adicional.serialize(),
                   }
-                }
-              })
-              return response.status(200).send(ordens)
-            })
+                }),
+              }
+            }
+          })
+          return response.status(200).send(ordens)
         })
     } catch (error) {
       if (error.messages) {
@@ -71,16 +58,11 @@ export default class OrdemServicosController {
         .validate({
           schema: schema.create({
             clienteId: schema.number([rules.exists({ table: 'clientes', column: 'id' })]),
-            tipo: schema.enum(['servico', 'os']),
-            etiqueta: schema.string.optional(),
-            produtoAnalise: schema.string.optional(),
             observacoes: schema.string.optional(),
-            problema: schema.string.optional(),
           }),
           messages: {
-            clienteId: 'O cliente precisa ser informado',
-            produtoAnalise: 'A analise do produto precisa ser informada',
-            problema: 'O problema precisa ser informada',
+            'clienteId.required': 'O cliente precisa ser informado',
+            'clienteId.exists': 'O cliente precisa ser informado',
           },
         })
         .then(async (data) => {
@@ -89,14 +71,14 @@ export default class OrdemServicosController {
               throw new Error('Caixa fechado')
             }
           })
-          await OrdemServico.create({
+          await Pedido.create({
             ...data,
             status: 'Em aberto',
             empresaId: auth.user?.empresaId,
-          }).then(async (os) => {
-            await os.load('cliente')
-            await os.load('servicos')
-            response.status(200).send(os)
+          }).then(async (pedido) => {
+            await pedido.load('cliente')
+            await pedido.load('adicionais')
+            response.status(200).send(pedido)
           })
         })
     } catch (error) {
@@ -115,26 +97,18 @@ export default class OrdemServicosController {
           schema: schema.create({
             clienteId: schema.number.optional([rules.exists({ table: 'clientes', column: 'id' })]),
             empresaId: schema.number.optional([rules.exists({ table: 'empresas', column: 'id' })]),
-            etiqueta: schema.string.optional(),
-            tipo: schema.enum(['servico', 'os']),
-            produtoAnalise: schema.string.optional(),
             observacoes: schema.string.optional(),
-            problema: schema.string.optional(),
-            solucao: schema.string.optional(),
-            garantia: schema.number.optional(),
           }),
           messages: {
-            clienteId: 'O cliente precisa ser informado',
-            empresaId: 'A empresa precisa ser informada',
-            produtoAnalise: 'A analise do produto precisa ser informada',
-            problema: 'O problema precisa ser informada',
+            'clienteId.exists': 'O cliente precisa ser informado',
+            'empresaId.exists': 'A empresa precisa ser informada',
           },
         })
         .then(async (data) => {
           const { id } = params
-          await OrdemServico.findOrFail(id).then(async (os) => {
-            os.merge(data)
-            await os.save()
+          await Pedido.findOrFail(id).then(async (pedido) => {
+            pedido.merge(data)
+            await pedido.save()
             response.status(200)
           })
         })
@@ -149,47 +123,47 @@ export default class OrdemServicosController {
 
   public async destroy({}: HttpContextContract) {}
 
-  public async addService({ response, request, params }: HttpContextContract) {
+  public async addAdicional({ response, request, params }: HttpContextContract) {
     try {
       await request
         .validate({
           schema: schema.create({
-            servicoId: schema.number([rules.exists({ table: 'servicos', column: 'id' })]),
+            adicionalId: schema.number([rules.exists({ table: 'adicionais', column: 'id' })]),
             quantidade: schema.number(),
             desconto: schema.number.optional(),
           }),
           messages: {
-            servicoId: 'O serviço precisa ser informado',
+            adicionalId: 'O adicional precisa ser informado',
             quantidade: 'A quantidade precisa ser informada',
           },
         })
-        .then(async ({ servicoId, quantidade, desconto }) => {
+        .then(async ({ adicionalId, quantidade, desconto }) => {
           const { id } = params
-          await OrdemServico.findOrFail(id).then(async (os) => {
-            await os.related('servicos').attach({
-              [servicoId]: {
+          await Pedido.findOrFail(id).then(async (pedido) => {
+            await pedido.related('adicionais').attach({
+              [adicionalId]: {
                 quantidade,
                 desconto,
               },
             })
-            await os.load('servicos')
-            await os.load('servicos', (query) => {
+            await pedido.load('adicionais')
+            await pedido.load('adicionais', (query) => {
               query.pivotColumns(['desconto', 'quantidade', 'id'])
               query.preload('unidade')
             })
 
-            const servicos = os.servicos.map((serv) => {
+            const adicionais = pedido.adicionais.map((adicional) => {
               return {
-                quantidade: serv.$extras.pivot_quantidade,
-                desconto: serv.$extras.pivot_desconto,
-                ordemServicoId: serv.$extras.pivot_ordem_servico_id,
-                servicoId: serv.$extras.pivot_servico_id,
-                id: serv.$extras.pivot_id,
-                servico: serv.serialize(),
+                quantidade: adicional.$extras.pivot_quantidade,
+                desconto: adicional.$extras.pivot_desconto,
+                pedidoId: adicional.$extras.pivot_pedido_id,
+                adicionalId: adicional.$extras.pivot_adicional_id,
+                id: adicional.$extras.pivot_id,
+                adicional: adicional.serialize(),
               }
             })
 
-            return response.status(200).send(servicos)
+            return response.status(200).send(adicionais)
           })
         })
     } catch (error) {
@@ -201,11 +175,11 @@ export default class OrdemServicosController {
     }
   }
 
-  public async removeService({ response, params }: HttpContextContract) {
+  public async removeAdicional({ response, params }: HttpContextContract) {
     try {
       const { id } = params
-      await OsServico.findOrFail(id).then(async (servico) => {
-        await servico.delete()
+      await PedidoAdicional.findOrFail(id).then(async (pedido) => {
+        await pedido.delete()
         return response.status(200)
       })
     } catch (error) {
@@ -213,7 +187,7 @@ export default class OrdemServicosController {
     }
   }
 
-  public async pagar({ response, request, params }: HttpContextContract) {
+  public async pagar({ response, request, params, auth }: HttpContextContract) {
     try {
       await request
         .validate({
@@ -222,7 +196,7 @@ export default class OrdemServicosController {
             valor: schema.number(),
             pagamento: schema.array().members(
               schema.object().members({
-                formaPagamento: schema.enum(['dinheiro', 'credito', 'debito', 'pix', 'prazo']),
+                formaPagamento: schema.enum(['dinheiro', 'credito', 'debito', 'pix']),
                 parcelas: schema.number(),
                 valor: schema.number(),
               })
@@ -241,21 +215,22 @@ export default class OrdemServicosController {
         })
         .then(async ({ status, valor, pagamento }) => {
           const { id } = params
-          await OrdemServico.findOrFail(id).then(async (os) => {
-            os.merge({ status, valor, entrega: DateTime.now() })
-            await os.save()
-            await os.related('pagamento').createMany(pagamento)
+          const { user } = auth
+          await Pedido.findOrFail(id).then(async (pedido) => {
+            pedido.merge({ status, valor, entrega: DateTime.now() })
+            await pedido.save()
+            await pedido.related('pagamento').createMany(pagamento)
             await Movimentacao.create({
-              empresaId: 1,
-              descricao: `Ordem de serviço nº ${os.id}`,
-              valor: os.valor,
+              empresaId: user?.id,
+              descricao: `Pedido nº ${pedido.id}`,
+              valor: pedido.valor,
               tipo: 'entrada',
-              origem: 'os',
+              origem: 'pedido',
             })
             await Receber.create({
-              clienteId: os.clienteId,
-              empresaId: 1,
-              valor: os.valor,
+              clienteId: pedido.clienteId,
+              empresaId: user?.id,
+              valor: pedido.valor,
               status: 'aguardando',
             }).then(async (receber) => {
               let parcelas: {
@@ -273,13 +248,10 @@ export default class OrdemServicosController {
                     valor: valorParcela,
                     parcela: index + 1,
                     vencimento:
-                      element.formaPagamento === 'credito' || element.formaPagamento === 'prazo'
+                      element.formaPagamento === 'credito'
                         ? DateTime.now().plus({ months: index + 1 })
                         : DateTime.now(),
-                    status:
-                      element.formaPagamento === 'credito' || element.formaPagamento === 'prazo'
-                        ? false
-                        : true,
+                    status: element.formaPagamento === 'credito' ? false : true,
                   })
                 })
               })

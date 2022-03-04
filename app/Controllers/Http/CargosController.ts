@@ -26,19 +26,13 @@ export default class CargosController {
               atualizar: schema.boolean(),
               apagar: schema.boolean(),
             }),
-            os: schema.object.optional().members({
+            pedidos: schema.object.optional().members({
               criar: schema.boolean(),
               visualizar: schema.boolean(),
               atualizar: schema.boolean(),
               apagar: schema.boolean(),
             }),
-            produtos: schema.object.optional().members({
-              criar: schema.boolean(),
-              visualizar: schema.boolean(),
-              atualizar: schema.boolean(),
-              apagar: schema.boolean(),
-            }),
-            servicos: schema.object.optional().members({
+            adicionais: schema.object.optional().members({
               criar: schema.boolean(),
               visualizar: schema.boolean(),
               atualizar: schema.boolean(),
@@ -57,12 +51,6 @@ export default class CargosController {
               apagar: schema.boolean(),
             }),
             unidades: schema.object.optional().members({
-              criar: schema.boolean(),
-              visualizar: schema.boolean(),
-              atualizar: schema.boolean(),
-              apagar: schema.boolean(),
-            }),
-            compras: schema.object.optional().members({
               criar: schema.boolean(),
               visualizar: schema.boolean(),
               atualizar: schema.boolean(),
@@ -135,19 +123,13 @@ export default class CargosController {
               atualizar: schema.boolean(),
               apagar: schema.boolean(),
             }),
-            os: schema.object.optional().members({
+            pedidos: schema.object.optional().members({
               criar: schema.boolean(),
               visualizar: schema.boolean(),
               atualizar: schema.boolean(),
               apagar: schema.boolean(),
             }),
-            produtos: schema.object.optional().members({
-              criar: schema.boolean(),
-              visualizar: schema.boolean(),
-              atualizar: schema.boolean(),
-              apagar: schema.boolean(),
-            }),
-            servicos: schema.object.optional().members({
+            adicionais: schema.object.optional().members({
               criar: schema.boolean(),
               visualizar: schema.boolean(),
               atualizar: schema.boolean(),
@@ -166,12 +148,6 @@ export default class CargosController {
               apagar: schema.boolean(),
             }),
             unidades: schema.object.optional().members({
-              criar: schema.boolean(),
-              visualizar: schema.boolean(),
-              atualizar: schema.boolean(),
-              apagar: schema.boolean(),
-            }),
-            compras: schema.object.optional().members({
               criar: schema.boolean(),
               visualizar: schema.boolean(),
               atualizar: schema.boolean(),

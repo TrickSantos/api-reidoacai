@@ -10,7 +10,7 @@ export default class Movimentacoes extends BaseSchema {
       table.string('descricao')
       table.decimal('valor')
       table.enum('tipo', ['entrada', 'saida']).notNullable()
-      table.enum('origem', ['os', 'pdv', 'outros']).notNullable()
+      table.enum('origem', ['pedidos', 'outros']).notNullable()
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })

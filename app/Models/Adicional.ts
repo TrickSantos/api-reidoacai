@@ -3,18 +3,19 @@ import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Empresa from './Empresa'
 import Unidade from './Unidade'
 
-export default class Servico extends BaseModel {
+export default class Adicional extends BaseModel {
+  public static table = 'adicionais'
   @column({ isPrimary: true })
   public id: number
 
+  @column({ serializeAs: 'unidadeId' })
+  public unidadeId: number
+
   @column()
-  public servico: string
+  public adicional: string
 
   @column()
   public descricao: string
-
-  @column({ serializeAs: 'unidadeId' })
-  public unidadeId: number
 
   @column()
   public valor: number
