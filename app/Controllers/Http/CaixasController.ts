@@ -14,8 +14,7 @@ export default class CaixasController {
         }
         if (data) {
           let parse = DateTime.fromFormat(data, 'yyyy-MM-dd')
-          builder.where({ createdAt: parse.toSQLDate() })
-          /* builder.whereRaw(`Date(created_at) = '${parse.toSQLDate()}'`) */
+          builder.whereRaw(`created::date = date '${parse.toSQLDate()}'`)
         }
         builder.where({ empresaId: auth.user?.empresaId })
         console.log(builder.toSQL())
