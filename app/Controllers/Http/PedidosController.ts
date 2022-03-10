@@ -225,7 +225,7 @@ export default class PedidosController {
               descricao: `Pedido nº ${pedido.id}`,
               valor: pedido.valor,
               tipo: 'entrada',
-              origem: 'pedido',
+              origem: 'pedidos',
             })
             await Receber.create({
               clienteId: pedido.clienteId,

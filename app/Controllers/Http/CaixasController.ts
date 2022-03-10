@@ -14,10 +14,13 @@ export default class CaixasController {
         }
         if (data) {
           let parse = DateTime.fromFormat(data, 'yyyy-MM-dd')
-          builder.whereRaw(`created_at::date = '${parse.toSQLDate()}'`)
+          builder.where({ createdAt: parse.toSQLDate() })
+          /* builder.whereRaw(`Date(created_at) = '${parse.toSQLDate()}'`) */
         }
         builder.where({ empresaId: auth.user?.empresaId })
+        console.log(builder.toSQL())
       })
+      console.log(movimentacao)
       return response.status(200).send(movimentacao)
     } catch (error) {
       return response
@@ -34,7 +37,7 @@ export default class CaixasController {
             descricao: schema.string(),
             valor: schema.number(),
             tipo: schema.enum(['entrada', 'saida']),
-            origem: schema.enum(['os', 'pdv', 'outros']),
+            origem: schema.enum(['pedidos', 'outros']),
           }),
           messages: {
             'descricao': 'A descrição precisa ser informada',

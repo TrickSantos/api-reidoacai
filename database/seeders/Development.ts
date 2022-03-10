@@ -13,11 +13,11 @@ export default class DevelopmentSeeder extends BaseSeeder {
 
   public async run() {
     await Empresa.create({
-      cnpjCpf: '000000000000000',
-      razaoSocial: 'Rei do Açai',
-      nomeFantasia: 'Rei do Açai',
-      email: 'reidoacai@email.com',
-      telefone: '0000000000000',
+      cnpjCpf: '40072516000166',
+      razaoSocial: 'TrickSantos Soluções para Informática',
+      nomeFantasia: 'Patrick Adan Santana dos Santos 04786299154',
+      email: 'patrick.tafa@gmail.com',
+      telefone: '65996363123',
       status: true,
       plano: 'Admin',
     }).then(async (empresa) => {
@@ -46,8 +46,8 @@ export default class DevelopmentSeeder extends BaseSeeder {
             empresaId: empresa.id,
             nome: 'Patrick Adan',
             email: 'patrick.tafa@gmail.com',
-            cpf: '11111111111',
-            password: 'secret',
+            cpf: '04786299154',
+            password: 'telecom6831',
           })
         })
     })
