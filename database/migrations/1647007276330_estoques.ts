@@ -1,7 +1,7 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
-export default class Recebers extends BaseSchema {
-  protected tableName = 'receber'
+export default class Estoques extends BaseSchema {
+  protected tableName = 'estoques'
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
@@ -10,23 +10,23 @@ export default class Recebers extends BaseSchema {
         .integer('empresa_id')
         .unsigned()
         .references('empresas.id')
-        .onDelete('cascade')
+        .onDelete('CASCADE')
         .notNullable()
       table
-        .integer('cliente_id')
+        .integer('produto_id')
         .unsigned()
-        .references('clientes.id')
-        .onDelete('cascade')
+        .references('produtos.id')
+        .onDelete('CASCADE')
         .notNullable()
+      table.integer('quantidade').notNullable()
+      table.enum('tipo', ['entrada', 'saida']).notNullable()
+      table.timestamp('created_at', { useTz: true })
       table
         .integer('created_by')
         .unsigned()
         .references('users.id')
         .onDelete('cascade')
         .notNullable()
-      table.decimal('valor')
-      table.enum('status', ['pago', 'aguardando', 'vencido']).defaultTo('aguardando')
-      table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })
   }

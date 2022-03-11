@@ -12,6 +12,7 @@ Route.resource('/movimentacao', 'CaixasController').apiOnly().middleware({ '*': 
 Route.resource('/cargo', 'CargosController').apiOnly().middleware({ '*': 'auth' })
 Route.resource('/receber', 'RecebersController').apiOnly().middleware({ '*': 'auth' })
 Route.resource('/pagar', 'PagarController').apiOnly().middleware({ '*': 'auth' })
+Route.resource('/estoque', 'EstoquesController').apiOnly().middleware({ '*': 'auth' })
 Route.put('/add_adicional/:id', 'PedidosController.addAdicional').middleware('auth')
 Route.put('/remove_adicional/:id', 'PedidosController.removeAdicional').middleware('auth')
 Route.put('/finalizar_pedido/:id', 'PedidosController.pagar').middleware('auth')

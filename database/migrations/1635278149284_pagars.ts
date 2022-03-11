@@ -6,11 +6,22 @@ export default class Pagars extends BaseSchema {
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('empresa_id').unsigned().references('empresas.id').onDelete('cascade')
+      table
+        .integer('empresa_id')
+        .unsigned()
+        .references('empresas.id')
+        .onDelete('cascade')
+        .notNullable()
       table.integer('fornecedor_id').unsigned().references('fornecedores.id').onDelete('cascade')
-      table.decimal('valor')
-      table.enum('status', ['pago', 'aguardando', 'vencido'])
+      table.decimal('valor').notNullable()
+      table.enum('status', ['pago', 'aguardando', 'vencido']).defaultTo('aguardando')
       table.timestamp('created_at', { useTz: true })
+      table
+        .integer('created_by')
+        .unsigned()
+        .references('users.id')
+        .onDelete('cascade')
+        .notNullable()
       table.timestamp('updated_at', { useTz: true })
     })
   }

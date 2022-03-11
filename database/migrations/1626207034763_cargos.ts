@@ -14,9 +14,16 @@ export default class Cargos extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.integer('empresa_id').unsigned().references('empresas.id')
+      table
+        .integer('created_by')
+        .unsigned()
+        .references('users.id')
+        .onDelete('cascade')
+        .notNullable()
       table.string('nome')
       table.json('pedidos').defaultTo(JSON.stringify(base))
-      table.json('adicionais').defaultTo(JSON.stringify(base))
+      table.json('produtos').defaultTo(JSON.stringify(base))
+      table.json('estoque').defaultTo(JSON.stringify(base))
       table.json('clientes').defaultTo(JSON.stringify(base))
       table.json('unidades').defaultTo(JSON.stringify(base))
       table.json('fornecedores').defaultTo(JSON.stringify(base))

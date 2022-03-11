@@ -79,7 +79,8 @@ export default class EmpresasController {
                 fornecedores: base,
                 pedidos: base,
                 unidades: base,
-                adicionais: base,
+                produtos: base,
+                estoque: base,
               })
               .then(async (cargo) => {
                 cargo.useTransaction(trx)

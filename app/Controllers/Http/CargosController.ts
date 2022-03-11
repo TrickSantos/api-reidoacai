@@ -14,7 +14,7 @@ export default class CargosController {
     }
   }
 
-  public async store({ request, response, auth }: HttpContextContract) {
+  public async store({ request, response, auth: { user } }: HttpContextContract) {
     try {
       await request
         .validate({
@@ -32,7 +32,13 @@ export default class CargosController {
               atualizar: schema.boolean(),
               apagar: schema.boolean(),
             }),
-            adicionais: schema.object.optional().members({
+            produtos: schema.object.optional().members({
+              criar: schema.boolean(),
+              visualizar: schema.boolean(),
+              atualizar: schema.boolean(),
+              apagar: schema.boolean(),
+            }),
+            estoque: schema.object.optional().members({
               criar: schema.boolean(),
               visualizar: schema.boolean(),
               atualizar: schema.boolean(),
@@ -98,8 +104,8 @@ export default class CargosController {
           },
         })
         .then(async (data) => {
-          await Cargo.create({ ...data, empresaId: auth.user?.empresaId }).then((cargo) =>
-            response.status(200).send(cargo)
+          await Cargo.create({ ...data, empresaId: user?.empresaId, createdBy: user?.id }).then(
+            (cargo) => response.status(200).send(cargo)
           )
         })
     } catch (error) {
@@ -111,7 +117,7 @@ export default class CargosController {
     }
   }
 
-  public async update({ request, response, params, auth }: HttpContextContract) {
+  public async update({ request, response, params, auth: { user } }: HttpContextContract) {
     try {
       await request
         .validate({
@@ -129,7 +135,13 @@ export default class CargosController {
               atualizar: schema.boolean(),
               apagar: schema.boolean(),
             }),
-            adicionais: schema.object.optional().members({
+            produtos: schema.object.optional().members({
+              criar: schema.boolean(),
+              visualizar: schema.boolean(),
+              atualizar: schema.boolean(),
+              apagar: schema.boolean(),
+            }),
+            estoque: schema.object.optional().members({
               criar: schema.boolean(),
               visualizar: schema.boolean(),
               atualizar: schema.boolean(),
@@ -197,7 +209,7 @@ export default class CargosController {
         .then(async (data) => {
           const { id } = params
           await Cargo.findOrFail(id).then(async (cargo) => {
-            cargo.merge({ ...data, empresaId: auth.user?.empresaId })
+            cargo.merge({ ...data, empresaId: user?.empresaId })
             await cargo.save()
             return response.status(200).send(cargo)
           })

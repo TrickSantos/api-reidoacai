@@ -14,14 +14,13 @@ export default class CaixasController {
         }
         if (data) {
           let parse = DateTime.fromFormat(data, 'yyyy-MM-dd')
-          builder.whereRaw(`created::date = date '${parse.toSQLDate()}'`)
+          builder.whereRaw(`created_at::date = date '${parse.toSQLDate()}'`)
         }
         builder.where({ empresaId: auth.user?.empresaId })
-        console.log(builder.toSQL())
       })
-      console.log(movimentacao)
       return response.status(200).send(movimentacao)
     } catch (error) {
+      console.log(error)
       return response
         .status(500)
         .send({ errors: [{ message: 'Erro ao encontrar movimentações, tente novamente' }] })

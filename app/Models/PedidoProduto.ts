@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Pedido from './Pedido'
-import Adicional from './Adicional'
+import Produto from './Produto'
 
-export default class PedidoAdicional extends BaseModel {
+export default class PedidoProdutos extends BaseModel {
   public static table = 'pedido_adicionais'
   @column({ isPrimary: true })
   public id: number
@@ -11,8 +11,8 @@ export default class PedidoAdicional extends BaseModel {
   @column({ serializeAs: 'pedidoId' })
   public pedidoId: number
 
-  @column({ serializeAs: 'adicionalId' })
-  public adicionalId: number
+  @column({ serializeAs: 'produtoId' })
+  public produtoId: number
 
   @column()
   public quantidade: number
@@ -23,8 +23,8 @@ export default class PedidoAdicional extends BaseModel {
   @belongsTo(() => Pedido)
   public pedido: BelongsTo<typeof Pedido>
 
-  @belongsTo(() => Adicional)
-  public adicional: BelongsTo<typeof Adicional>
+  @belongsTo(() => Produto)
+  public produto: BelongsTo<typeof Produto>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

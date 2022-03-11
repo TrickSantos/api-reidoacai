@@ -13,6 +13,18 @@ export default class ReceberParcelados extends BaseSchema {
       table.dateTime('pagamento')
       table.boolean('status')
       table.timestamp('created_at', { useTz: true })
+      table
+        .integer('created_by')
+        .unsigned()
+        .references('users.id')
+        .onDelete('cascade')
+        .notNullable()
+      table
+        .integer('updated_by')
+        .unsigned()
+        .references('users.id')
+        .onDelete('cascade')
+        .notNullable()
       table.timestamp('updated_at', { useTz: true })
     })
   }

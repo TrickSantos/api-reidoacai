@@ -52,11 +52,19 @@ export default class RecebersController {
             'parcelas.*.parcela.required': 'A parcela precisa ser informada',
           },
         })
-        .then(async (data) => {
-          await Receber.create({ ...data, empresaId: user?.empresaId }).then(async (receber) => {
-            await receber.related('parcelas').createMany(data.parcelas)
-            return response.status(200)
-          })
+        .then(async ({ parcelas, ...data }) => {
+          await Receber.create({ ...data, empresaId: user?.empresaId, createdBy: user?.id }).then(
+            async (receber) => {
+              await receber.related('parcelas').createMany(
+                parcelas.map((parcela) => ({
+                  ...parcela,
+                  createdBy: user?.id,
+                  updatedBy: user?.id,
+                }))
+              )
+              return response.status(200)
+            }
+          )
         })
     } catch (error) {
       if (error.messages) {
@@ -67,13 +75,14 @@ export default class RecebersController {
     }
   }
 
-  public async darBaixa({ params, response }: HttpContextContract) {
+  public async darBaixa({ params, response, auth: { user } }: HttpContextContract) {
     try {
       const { id } = params
       await Parcela.findOrFail(id).then(async (parcela) => {
         parcela.merge({
           status: true,
           pagamento: DateTime.now(),
+          updatedBy: user?.id,
         })
         await parcela.save()
         await parcela.load('receber', (query) => {

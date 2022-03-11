@@ -6,8 +6,24 @@ export default class Pedidos extends BaseSchema {
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('cliente_id').unsigned().references('clientes.id').onDelete('cascade')
-      table.integer('empresa_id').unsigned().references('empresas.id').onDelete('cascade')
+      table
+        .integer('cliente_id')
+        .unsigned()
+        .references('clientes.id')
+        .onDelete('cascade')
+        .notNullable()
+      table
+        .integer('empresa_id')
+        .unsigned()
+        .references('empresas.id')
+        .onDelete('cascade')
+        .notNullable()
+      table
+        .integer('created_by')
+        .unsigned()
+        .references('users.id')
+        .onDelete('cascade')
+        .notNullable()
       table.text('observacoes')
       table.string('status').defaultTo('Em aberto')
       table.decimal('valor')

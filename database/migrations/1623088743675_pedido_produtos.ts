@@ -1,21 +1,20 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
-export default class Adicionais extends BaseSchema {
-  protected tableName = 'adicionais'
+export default class PedidoProdutos extends BaseSchema {
+  protected tableName = 'pedido_produtos'
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table
-        .integer('empresa_id')
+        .integer('pedido_id')
         .unsigned()
-        .references('id')
-        .inTable('empresas')
+        .references('pedidos.id')
         .onDelete('cascade')
-      table.integer('unidade_id').unsigned().references('id').inTable('unidades')
-      table.string('adicional')
-      table.string('descricao')
-      table.decimal('valor')
+        .notNullable()
+      table.integer('produto_id').unsigned().references('produtos.id').notNullable()
+      table.integer('quantidade').defaultTo(0)
+      table.decimal('desconto').defaultTo(0)
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })

@@ -1,19 +1,19 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import Adicionais from 'App/Models/Adicional'
+import Produtos from 'App/Models/Produto'
 
-export default class AdicionaisController {
+export default class ProdutosController {
   public async index({ response, auth }: HttpContextContract) {
     const { user } = auth
     try {
-      await Adicionais.query()
+      await Produtos.query()
         .where((builder) => {
           if (user) {
             builder.where({ empresaId: user.empresaId })
           }
         })
         .preload('unidade')
-        .then((adicionais) => response.status(200).send(adicionais))
+        .then((produtos) => response.status(200).send(produtos))
     } catch (error) {
       if (error.messages) {
         return response.status(500).send(error.messages)
@@ -29,20 +29,20 @@ export default class AdicionaisController {
         .validate({
           schema: schema.create({
             unidadeId: schema.number([rules.exists({ table: 'unidades', column: 'id' })]),
-            adicional: schema.string(),
+            nome: schema.string(),
             descricao: schema.string(),
             valor: schema.number(),
           }),
           messages: {
-            adicional: 'O adicional precisa ser informado',
-            descricao: 'A descrição do adicional precisa ser informada',
-            unidadeId: 'A unidade precisa ser informada',
-            valor: 'O valor precisa ser informado',
+            'nome.required': 'O produto precisa ser informado',
+            'descricao.required': 'A descrição do produto precisa ser informada',
+            'unidadeId.required': 'A unidade precisa ser informada',
+            'valor.required': 'O valor precisa ser informado',
           },
         })
         .then(async (data) => {
-          await Adicionais.create({ ...data, empresaId: auth.user?.empresaId }).then((adicional) =>
-            response.status(200).send(adicional)
+          await Produtos.create({ ...data, empresaId: auth.user?.empresaId }).then((produto) =>
+            response.status(200).send(produto)
           )
         })
     } catch (error) {
@@ -60,23 +60,20 @@ export default class AdicionaisController {
         .validate({
           schema: schema.create({
             unidadeId: schema.number.optional([rules.exists({ table: 'unidades', column: 'id' })]),
-            adicional: schema.string.optional(),
+            nome: schema.string.optional(),
             descricao: schema.string.optional(),
             valor: schema.number.optional(),
           }),
           messages: {
-            adicional: 'O adicional precisa ser informado',
-            descricao: 'A descrição do adicional precisa ser informada',
-            unidadeId: 'A unidade precisa ser informada',
-            valor: 'O valor precisa ser informado',
+            'unidadeId.exists': 'A unidade precisa ser informada',
           },
         })
         .then(async (data) => {
           const { id } = params
-          await Adicionais.findOrFail(id).then(async (adicional) => {
-            adicional.merge(data)
-            await adicional.save()
-            return response.status(200).send(adicional)
+          await Produtos.findOrFail(id).then(async (produto) => {
+            produto.merge(data)
+            await produto.save()
+            return response.status(200).send(produto)
           })
         })
     } catch (error) {
@@ -91,8 +88,8 @@ export default class AdicionaisController {
   public async destroy({ params, response }: HttpContextContract) {
     try {
       const { id } = params
-      await Adicionais.findOrFail(id).then(async (adicional) => {
-        await adicional.delete()
+      await Produtos.findOrFail(id).then(async (produto) => {
+        await produto.delete()
         return response.status(200)
       })
     } catch (error) {

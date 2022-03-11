@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, belongsTo, BelongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Fornecedor from './Fornecedor'
 import PagarParcelado from './PagarParcelado'
+import Users from './Users'
 
 export default class Pagar extends BaseModel {
   public static table = 'pagar'
@@ -28,6 +29,12 @@ export default class Pagar extends BaseModel {
 
   @column.dateTime({ autoCreate: true, serializeAs: 'data' })
   public createdAt: DateTime
+
+  @column({ serializeAs: 'criadoPor' })
+  public createdBy: number
+
+  @belongsTo(() => Users)
+  public criador: BelongsTo<typeof Users>
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime

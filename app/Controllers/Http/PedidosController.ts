@@ -4,7 +4,7 @@ import Pedido from 'App/Models/Pedido'
 import Movimentacao from 'App/Models/Movimentacao'
 import Receber from 'App/Models/Receber'
 import { DateTime } from 'luxon'
-import PedidoAdicional from 'App/Models/PedidoAdicional'
+import PedidoProduto from 'App/Models/PedidoProduto'
 import Caixa from 'App/Models/Caixa'
 
 export default class PedidosController {
@@ -17,31 +17,31 @@ export default class PedidosController {
             builder.where({ empresaId: user.empresaId })
           }
         })
-        .preload('adicionais', (query) => {
+        .preload('produtos', (query) => {
           query.pivotColumns(['desconto', 'quantidade', 'id'])
           query.preload('unidade')
         })
         .preload('cliente')
         .then((pedidos) => {
-          const ordens = pedidos.map((pedido) => {
-            if (pedido.adicionais) {
-              const temp = pedido.adicionais
+          const res = pedidos.map((pedido) => {
+            if (pedido.produtos) {
+              const temp = pedido.produtos
               return {
                 ...pedido.serialize(),
-                adicionais: temp.map((adicional) => {
+                produtos: temp.map((produto) => {
                   return {
-                    quantidade: adicional.$extras.pivot_quantidade,
-                    desconto: adicional.$extras.pivot_desconto,
-                    pedidoId: adicional.$extras.pivot_pedido_id,
-                    adicionalId: adicional.$extras.pivot_adicional_id,
-                    id: adicional.$extras.pivot_id,
-                    adicional: adicional.serialize(),
+                    quantidade: produto.$extras.pivot_quantidade,
+                    desconto: produto.$extras.pivot_desconto,
+                    pedidoId: produto.$extras.pivot_pedido_id,
+                    produtoId: produto.$extras.pivot_produto_id,
+                    id: produto.$extras.pivot_id,
+                    produto: produto.serialize(),
                   }
                 }),
               }
             }
           })
-          return response.status(200).send(ordens)
+          return response.status(200).send(res)
         })
     } catch (error) {
       if (error.messages) {
@@ -75,9 +75,10 @@ export default class PedidosController {
             ...data,
             status: 'Em aberto',
             empresaId: auth.user?.empresaId,
+            createdBy: auth.user?.id,
           }).then(async (pedido) => {
             await pedido.load('cliente')
-            await pedido.load('adicionais')
+            await pedido.load('produtos')
             response.status(200).send(pedido)
           })
         })
@@ -121,49 +122,47 @@ export default class PedidosController {
     }
   }
 
-  public async destroy({}: HttpContextContract) {}
-
   public async addAdicional({ response, request, params }: HttpContextContract) {
     try {
       await request
         .validate({
           schema: schema.create({
-            adicionalId: schema.number([rules.exists({ table: 'adicionais', column: 'id' })]),
+            produtoId: schema.number([rules.exists({ table: 'produtos', column: 'id' })]),
             quantidade: schema.number(),
             desconto: schema.number.optional(),
           }),
           messages: {
-            adicionalId: 'O adicional precisa ser informado',
+            produtoId: 'O produto precisa ser informado',
             quantidade: 'A quantidade precisa ser informada',
           },
         })
-        .then(async ({ adicionalId, quantidade, desconto }) => {
+        .then(async ({ produtoId, quantidade, desconto }) => {
           const { id } = params
           await Pedido.findOrFail(id).then(async (pedido) => {
-            await pedido.related('adicionais').attach({
-              [adicionalId]: {
+            await pedido.related('produtos').attach({
+              [produtoId]: {
                 quantidade,
                 desconto,
               },
             })
-            await pedido.load('adicionais')
-            await pedido.load('adicionais', (query) => {
+            await pedido.load('produtos')
+            await pedido.load('produtos', (query) => {
               query.pivotColumns(['desconto', 'quantidade', 'id'])
               query.preload('unidade')
             })
 
-            const adicionais = pedido.adicionais.map((adicional) => {
+            const produtos = pedido.produtos.map((produto) => {
               return {
-                quantidade: adicional.$extras.pivot_quantidade,
-                desconto: adicional.$extras.pivot_desconto,
-                pedidoId: adicional.$extras.pivot_pedido_id,
-                adicionalId: adicional.$extras.pivot_adicional_id,
-                id: adicional.$extras.pivot_id,
-                adicional: adicional.serialize(),
+                quantidade: produto.$extras.pivot_quantidade,
+                desconto: produto.$extras.pivot_desconto,
+                pedidoId: produto.$extras.pivot_pedido_id,
+                produtoId: produto.$extras.pivot_produto_id,
+                id: produto.$extras.pivot_id,
+                produto: produto.serialize(),
               }
             })
 
-            return response.status(200).send(adicionais)
+            return response.status(200).send(produtos)
           })
         })
     } catch (error) {
@@ -178,7 +177,7 @@ export default class PedidosController {
   public async removeAdicional({ response, params }: HttpContextContract) {
     try {
       const { id } = params
-      await PedidoAdicional.findOrFail(id).then(async (pedido) => {
+      await PedidoProduto.findOrFail(id).then(async (pedido) => {
         await pedido.delete()
         return response.status(200)
       })
@@ -221,7 +220,8 @@ export default class PedidosController {
             await pedido.save()
             await pedido.related('pagamento').createMany(pagamento)
             await Movimentacao.create({
-              empresaId: user?.id,
+              empresaId: user?.empresaId,
+              createdBy: user?.id,
               descricao: `Pedido nº ${pedido.id}`,
               valor: pedido.valor,
               tipo: 'entrada',
@@ -229,15 +229,18 @@ export default class PedidosController {
             })
             await Receber.create({
               clienteId: pedido.clienteId,
-              empresaId: user?.id,
+              empresaId: user?.empresaId,
+              createdBy: user?.id,
               valor: pedido.valor,
-              status: 'aguardando',
+              status: 'pago',
             }).then(async (receber) => {
               let parcelas: {
                 valor: number
                 parcela: number
                 vencimento: DateTime
                 status: boolean
+                createdBy?: number
+                updatedBy?: number
               }[] = []
               pagamento.forEach((element) => {
                 Array.from({ length: element.parcelas }, (_, index) => {
@@ -251,7 +254,9 @@ export default class PedidosController {
                       element.formaPagamento === 'credito'
                         ? DateTime.now().plus({ months: index + 1 })
                         : DateTime.now(),
-                    status: element.formaPagamento === 'credito' ? false : true,
+                    status: true,
+                    createdBy: user?.id,
+                    updatedBy: user?.id,
                   })
                 })
               })

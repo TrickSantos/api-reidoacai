@@ -3,7 +3,7 @@ import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Empresa from './Empresa'
 import Unidade from './Unidade'
 
-export default class Adicional extends BaseModel {
+export default class Produto extends BaseModel {
   public static table = 'adicionais'
   @column({ isPrimary: true })
   public id: number
@@ -11,17 +11,17 @@ export default class Adicional extends BaseModel {
   @column({ serializeAs: 'unidadeId' })
   public unidadeId: number
 
+  @column({ serializeAs: 'empresaId' })
+  public empresaId: number
+
   @column()
-  public adicional: string
+  public nome: string
 
   @column()
   public descricao: string
 
   @column()
   public valor: number
-
-  @column({ serializeAs: 'empresaId' })
-  public empresaId: number
 
   @belongsTo(() => Empresa)
   public empresa: BelongsTo<typeof Empresa>

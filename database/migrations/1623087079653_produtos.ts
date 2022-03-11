@@ -1,27 +1,21 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
-export default class Movimentacoes extends BaseSchema {
-  protected tableName = 'movimentacoes'
+export default class Produtos extends BaseSchema {
+  protected tableName = 'produtos'
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.increments('id').primary()
       table
         .integer('empresa_id')
         .unsigned()
         .references('empresas.id')
         .onDelete('cascade')
         .notNullable()
-      table
-        .integer('created_by')
-        .unsigned()
-        .references('users.id')
-        .onDelete('cascade')
-        .notNullable()
+      table.integer('unidade_id').unsigned().references('unidades.id').notNullable()
+      table.string('nome').notNullable()
       table.string('descricao')
       table.decimal('valor').notNullable()
-      table.enum('tipo', ['entrada', 'saida']).notNullable()
-      table.enum('origem', ['pedidos', 'outros']).notNullable()
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })
