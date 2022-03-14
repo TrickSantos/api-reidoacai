@@ -8,9 +8,12 @@ import PedidoProduto from 'App/Models/PedidoProduto'
 import Caixa from 'App/Models/Caixa'
 
 export default class PedidosController {
-  public async index({ response, auth }: HttpContextContract) {
+  public async index({ response, auth: { user } }: HttpContextContract) {
     try {
-      const { user } = auth
+      await user?.load('cargo')
+      if (!user?.cargo.pedidos.visualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Pedido.query()
         .where((builder) => {
           if (user) {
@@ -52,8 +55,12 @@ export default class PedidosController {
     }
   }
 
-  public async store({ request, response, auth }: HttpContextContract) {
+  public async store({ request, response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.pedidos.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -74,8 +81,8 @@ export default class PedidosController {
           await Pedido.create({
             ...data,
             status: 'Em aberto',
-            empresaId: auth.user?.empresaId,
-            createdBy: auth.user?.id,
+            empresaId: user?.empresaId,
+            createdBy: user?.id,
           }).then(async (pedido) => {
             await pedido.load('cliente')
             await pedido.load('produtos')
@@ -91,8 +98,12 @@ export default class PedidosController {
     }
   }
 
-  public async update({ request, response, params }: HttpContextContract) {
+  public async update({ request, response, params, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.pedidos.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -122,8 +133,12 @@ export default class PedidosController {
     }
   }
 
-  public async addAdicional({ response, request, params }: HttpContextContract) {
+  public async addAdicional({ response, request, params, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.pedidos.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -174,9 +189,13 @@ export default class PedidosController {
     }
   }
 
-  public async removeAdicional({ response, params }: HttpContextContract) {
+  public async removeAdicional({ response, params, auth: { user } }: HttpContextContract) {
     try {
       const { id } = params
+      await user?.load('cargo')
+      if (!user?.cargo.pedidos.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await PedidoProduto.findOrFail(id).then(async (pedido) => {
         await pedido.delete()
         return response.status(200)
@@ -186,8 +205,12 @@ export default class PedidosController {
     }
   }
 
-  public async pagar({ response, request, params, auth }: HttpContextContract) {
+  public async pagar({ response, request, params, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.pedidos.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -214,7 +237,6 @@ export default class PedidosController {
         })
         .then(async ({ status, valor, pagamento }) => {
           const { id } = params
-          const { user } = auth
           await Pedido.findOrFail(id).then(async (pedido) => {
             pedido.merge({ status, valor, entrega: DateTime.now() })
             await pedido.save()

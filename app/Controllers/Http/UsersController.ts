@@ -3,9 +3,12 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Users from 'App/Models/Users'
 
 export default class UsersController {
-  public async index({ response, auth }: HttpContextContract) {
+  public async index({ response, auth: { user } }: HttpContextContract) {
     try {
-      const user = auth.user
+      await user?.load('cargo')
+      if (!user?.cargo.usuarios.visualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Users.query()
         .where((builder) => {
           if (user) {
@@ -20,8 +23,12 @@ export default class UsersController {
     }
   }
 
-  public async store({ request, response, auth }: HttpContextContract) {
+  public async store({ request, response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.usuarios.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -34,7 +41,7 @@ export default class UsersController {
                 column: 'id',
                 table: 'cargos',
                 where: {
-                  empresa_id: auth.user?.empresaId,
+                  empresa_id: user?.empresaId,
                 },
               }),
             ]),
@@ -52,7 +59,7 @@ export default class UsersController {
           },
         })
         .then(async (data) => {
-          await Users.create({ ...data, empresaId: auth.user?.empresaId }).then((user) =>
+          await Users.create({ ...data, empresaId: user?.empresaId }).then((user) =>
             response.status(200).send(user)
           )
         })
@@ -65,8 +72,12 @@ export default class UsersController {
     }
   }
 
-  public async update({ request, response, params, auth }: HttpContextContract) {
+  public async update({ request, response, params, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.usuarios.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -82,13 +93,15 @@ export default class UsersController {
             ]),
             password: schema.string.optional(),
             nome: schema.string.optional(),
-            cpf: schema.string.optional({}, [rules.unique({ table: 'users', column: 'cpf' })]),
+            cpf: schema.string.optional({}, [
+              rules.unique({ table: 'users', column: 'cpf', whereNot: { id: params.id } }),
+            ]),
             cargoId: schema.number.optional([
               rules.exists({
                 column: 'id',
                 table: 'cargos',
                 where: {
-                  empresa_id: auth.user?.empresaId,
+                  empresa_id: user?.empresaId,
                 },
               }),
             ]),
@@ -125,8 +138,12 @@ export default class UsersController {
     }
   }
 
-  public async destroy({ response, params }: HttpContextContract) {
+  public async destroy({ response, params, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.usuarios.apagar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       const { id } = params
       await Users.findOrFail(id).then(async (user) => {
         await user.delete()

@@ -3,10 +3,14 @@ import { schema } from '@ioc:Adonis/Core/Validator'
 import Cargo from 'App/Models/Cargo'
 
 export default class CargosController {
-  public async index({ response, auth }: HttpContextContract) {
+  public async index({ response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.cargos.visualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Cargo.query()
-        .where({ empresaId: auth.user?.empresaId })
+        .where({ empresaId: user?.empresaId })
         .then((cargos) => response.status(200).send(cargos))
     } catch (error) {
       console.log(error)
@@ -16,6 +20,10 @@ export default class CargosController {
 
   public async store({ request, response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.cargos.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -119,6 +127,10 @@ export default class CargosController {
 
   public async update({ request, response, params, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.cargos.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -223,9 +235,13 @@ export default class CargosController {
     }
   }
 
-  public async destroy({ response, params }: HttpContextContract) {
+  public async destroy({ response, params, auth: { user } }: HttpContextContract) {
     try {
       const { id } = params
+      await user?.load('cargo')
+      if (!user?.cargo.cargos.apagar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Cargo.findOrFail(id).then(async (cargo) => {
         await cargo.delete()
         return response.status(200)

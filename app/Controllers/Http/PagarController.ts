@@ -6,8 +6,11 @@ import Parcela from 'App/Models/PagarParcelado'
 import { DateTime } from 'luxon'
 
 export default class PagarController {
-  public async index({ response, auth }: HttpContextContract) {
-    const { user } = auth
+  public async index({ response, auth: { user } }: HttpContextContract) {
+    await user?.load('cargo')
+    if (!user?.cargo.aPagar.visualizar) {
+      return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+    }
     try {
       await Fornecedor.query()
         .where((builder) => {
@@ -29,6 +32,10 @@ export default class PagarController {
 
   public async store({ response, request, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.aPagar.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -77,6 +84,10 @@ export default class PagarController {
   public async darBaixa({ params, response, auth: { user } }: HttpContextContract) {
     try {
       const { id } = params
+      await user?.load('cargo')
+      if (!user?.cargo.aPagar.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Parcela.findOrFail(id).then(async (parcela) => {
         parcela.merge({
           status: true,

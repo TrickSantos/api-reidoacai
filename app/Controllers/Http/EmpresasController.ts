@@ -12,8 +12,12 @@ const base = {
 }
 
 export default class EmpresasController {
-  public async index({ response }: HttpContextContract) {
+  public async index({ response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.empresas.visualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Empresa.all().then((empresas) => response.status(200).send(empresas))
     } catch (error) {
       console.log(error.message)
@@ -21,8 +25,12 @@ export default class EmpresasController {
     }
   }
 
-  public async store({ request, response }: HttpContextContract) {
+  public async store({ request, response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.empresas.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -123,8 +131,12 @@ export default class EmpresasController {
     }
   }
 
-  public async update({ request, response, params }: HttpContextContract) {
+  public async update({ request, response, params, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.empresas.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -172,9 +184,13 @@ export default class EmpresasController {
     }
   }
 
-  public async destroy({ response, params }: HttpContextContract) {
+  public async destroy({ response, params, auth: { user } }: HttpContextContract) {
     try {
       const { id } = params
+      await user?.load('cargo')
+      if (!user?.cargo.empresas.apagar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Empresa.findOrFail(id).then(async (empresa) => {
         await empresa.delete()
         return response.status(200)

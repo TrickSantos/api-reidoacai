@@ -3,8 +3,11 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Fornecedor from 'App/Models/Fornecedor'
 
 export default class FornecedoresController {
-  public async index({ response, auth }: HttpContextContract) {
-    const { user } = auth
+  public async index({ response, auth: { user } }: HttpContextContract) {
+    await user?.load('cargo')
+    if (!user?.cargo.fornecedores.visualizar) {
+      return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+    }
     try {
       await Fornecedor.query()
         .where((builder) => {
@@ -22,8 +25,12 @@ export default class FornecedoresController {
     }
   }
 
-  public async store({ request, response, auth }: HttpContextContract) {
+  public async store({ request, response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.fornecedores.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -44,7 +51,7 @@ export default class FornecedoresController {
           },
         })
         .then(async (data) => {
-          await Fornecedor.create({ ...data, empresaId: auth.user?.empresaId }).then((cliente) =>
+          await Fornecedor.create({ ...data, empresaId: user?.empresaId }).then((cliente) =>
             response.status(200).send(cliente)
           )
         })
@@ -57,9 +64,13 @@ export default class FornecedoresController {
     }
   }
 
-  public async update({ params, request, response, auth }: HttpContextContract) {
+  public async update({ params, request, response, auth: { user } }: HttpContextContract) {
     const { id } = params
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.fornecedores.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -81,7 +92,7 @@ export default class FornecedoresController {
         })
         .then(async (data) => {
           await Fornecedor.findOrFail(id).then(async (cliente) => {
-            cliente.merge({ ...data, empresaId: auth.user?.empresaId })
+            cliente.merge({ ...data, empresaId: user?.empresaId })
             await cliente.save()
             return response.status(200).send(cliente)
           })
@@ -95,9 +106,13 @@ export default class FornecedoresController {
     }
   }
 
-  public async destroy({ params, response }: HttpContextContract) {
+  public async destroy({ params, response, auth: { user } }: HttpContextContract) {
     try {
       const { id } = params
+      await user?.load('cargo')
+      if (!user?.cargo.fornecedores.apagar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Fornecedor.findOrFail(id).then(async (cliente) => {
         await cliente.delete()
         return response.status(200)

@@ -5,9 +5,13 @@ import Caixa from 'App/Models/Caixa'
 import { DateTime } from 'luxon'
 
 export default class CaixasController {
-  public async index({ response, request, auth }: HttpContextContract) {
+  public async index({ response, request, auth: { user } }: HttpContextContract) {
     const { tipo, data } = request.all()
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.caixa.visualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       const movimentacao = await Movimentacao.query().where((builder) => {
         if (tipo) {
           builder.where({ tipo })
@@ -16,7 +20,7 @@ export default class CaixasController {
           let parse = DateTime.fromFormat(data, 'yyyy-MM-dd')
           builder.whereRaw(`created_at::date = date '${parse.toSQLDate()}'`)
         }
-        builder.where({ empresaId: auth.user?.empresaId })
+        builder.where({ empresaId: user?.empresaId })
       })
       return response.status(200).send(movimentacao)
     } catch (error) {
@@ -27,8 +31,12 @@ export default class CaixasController {
     }
   }
 
-  public async store({ response, request, auth }: HttpContextContract) {
+  public async store({ response, request, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.caixa.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -53,7 +61,7 @@ export default class CaixasController {
           })
           const movimentacao = await Movimentacao.create({
             ...data,
-            empresaId: auth.user?.empresaId,
+            empresaId: user?.empresaId,
           })
           return response.status(200).send(movimentacao)
         })
@@ -66,9 +74,13 @@ export default class CaixasController {
     }
   }
 
-  public async fecharCaixa({ response, request, params, auth }: HttpContextContract) {
+  public async fecharCaixa({ response, request, params, auth: { user } }: HttpContextContract) {
     try {
       const { id } = params
+      await user?.load('cargo')
+      if (!user?.cargo.caixa.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -80,7 +92,7 @@ export default class CaixasController {
         })
         .then(async (data) => {
           await Caixa.findOrFail(id).then(async (caixa) => {
-            caixa.merge({ ...data, empresaId: auth.user?.empresaId, status: false })
+            caixa.merge({ ...data, empresaId: user?.empresaId, status: false })
             await caixa.save()
             return response.status(200).send(caixa)
           })
@@ -94,10 +106,14 @@ export default class CaixasController {
     }
   }
 
-  public async abrirCaixa({ response, auth }: HttpContextContract) {
+  public async abrirCaixa({ response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.caixa.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Caixa.create({
-        empresaId: auth.user?.empresaId,
+        empresaId: user?.empresaId,
         data: DateTime.now(),
         valor: 0,
         status: true,
@@ -107,16 +123,14 @@ export default class CaixasController {
     }
   }
 
-  public async reabrirCaixa({ response, params, auth }: HttpContextContract) {
+  public async reabrirCaixa({ response, params, auth: { user } }: HttpContextContract) {
     try {
-      const user = auth.user
-      const { id } = params
-      if (user) {
-        await user.load('cargo')
-        if (user.cargo.caixa.atualizar === false) {
-          throw new Error('Permissão negada!')
-        }
+      await user?.load('cargo')
+      if (!user?.cargo.caixa.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
       }
+      const { id } = params
+
       await Caixa.findOrFail(id).then(async (caixa) => {
         caixa.merge({
           status: true,
@@ -129,14 +143,14 @@ export default class CaixasController {
     }
   }
 
-  public async verificarCaixa({ response, request, auth }: HttpContextContract) {
+  public async verificarCaixa({ response, request, auth: { user } }: HttpContextContract) {
     try {
       const { data } = request.all()
       await Caixa.query()
         .where((builder) => {
           const parse = DateTime.fromFormat(data, 'yyyy-MM-dd')
           builder.whereRaw(`data::date = '${parse.toSQLDate()}'`)
-          builder.where({ empresaId: auth.user?.empresaId })
+          builder.where({ empresaId: user?.empresaId })
         })
         .then((caixa) => response.status(200).send(caixa[0]))
     } catch (error) {

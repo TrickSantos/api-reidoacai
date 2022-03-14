@@ -3,9 +3,12 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Cliente from 'App/Models/Cliente'
 
 export default class ClientesController {
-  public async index({ response, auth }: HttpContextContract) {
-    const { user } = auth
+  public async index({ response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.clientes.visualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Cliente.query()
         .where((builder) => {
           if (user) {
@@ -22,8 +25,12 @@ export default class ClientesController {
     }
   }
 
-  public async store({ request, response, auth }: HttpContextContract) {
+  public async store({ request, response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.clientes.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -43,7 +50,7 @@ export default class ClientesController {
           },
         })
         .then(async (data) => {
-          await Cliente.create({ ...data, empresaId: auth.user?.empresaId }).then((cliente) =>
+          await Cliente.create({ ...data, empresaId: user?.empresaId }).then((cliente) =>
             response.status(200).send(cliente)
           )
         })
@@ -56,9 +63,13 @@ export default class ClientesController {
     }
   }
 
-  public async update({ params, request, response }: HttpContextContract) {
+  public async update({ params, request, response, auth: { user } }: HttpContextContract) {
     const { id } = params
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.clientes.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -92,9 +103,13 @@ export default class ClientesController {
     }
   }
 
-  public async destroy({ params, response }: HttpContextContract) {
+  public async destroy({ params, response, auth: { user } }: HttpContextContract) {
     try {
       const { id } = params
+      await user?.load('cargo')
+      if (!user?.cargo.clientes.apagar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await Cliente.findOrFail(id).then(async (cliente) => {
         await cliente.delete()
         return response.status(200)

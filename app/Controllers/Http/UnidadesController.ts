@@ -3,8 +3,11 @@ import { schema } from '@ioc:Adonis/Core/Validator'
 import Unidade from 'App/Models/Unidade'
 
 export default class UnidadesController {
-  public async index({ response, auth }: HttpContextContract) {
-    const { user } = auth
+  public async index({ response, auth: { user } }: HttpContextContract) {
+    await user?.load('cargo')
+    if (!user?.cargo.unidades.visualizar) {
+      return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+    }
     try {
       await Unidade.query()
         .where((builder) => {
@@ -23,8 +26,12 @@ export default class UnidadesController {
     }
   }
 
-  public async store({ request, response, auth }: HttpContextContract) {
+  public async store({ request, response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.unidades.criar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -37,7 +44,7 @@ export default class UnidadesController {
           },
         })
         .then(async (data) => {
-          await Unidade.create({ ...data, empresaId: auth.user?.empresaId }).then((unidade) =>
+          await Unidade.create({ ...data, empresaId: user?.empresaId }).then((unidade) =>
             response.status(200).send(unidade)
           )
         })
@@ -50,8 +57,12 @@ export default class UnidadesController {
     }
   }
 
-  public async update({ params, request, response }: HttpContextContract) {
+  public async update({ params, request, response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.unidades.atualizar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       await request
         .validate({
           schema: schema.create({
@@ -76,8 +87,12 @@ export default class UnidadesController {
     }
   }
 
-  public async destroy({ params, response }: HttpContextContract) {
+  public async destroy({ params, response, auth: { user } }: HttpContextContract) {
     try {
+      await user?.load('cargo')
+      if (!user?.cargo.unidades.apagar) {
+        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+      }
       const { id } = params
       await Unidade.findOrFail(id).then(async (unidade) => {
         await unidade.delete()
