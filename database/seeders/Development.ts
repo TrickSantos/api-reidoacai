@@ -38,7 +38,7 @@ export default class DevelopmentSeeder extends BaseSeeder {
           clientes: base,
           pedidos: base,
           fornecedores: base,
-          adicionais: base,
+          produtos: base,
           unidades: base,
         })
         .then(async (cargo) => {

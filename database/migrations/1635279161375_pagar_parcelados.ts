@@ -25,12 +25,6 @@ export default class PagarParcelados extends BaseSchema {
         .references('users.id')
         .onDelete('cascade')
         .notNullable()
-      table
-        .integer('updated_by')
-        .unsigned()
-        .references('users.id')
-        .onDelete('cascade')
-        .notNullable()
       table.timestamp('updated_at', { useTz: true })
     })
   }

@@ -4,7 +4,6 @@ import Empresa from './Empresa'
 import Unidade from './Unidade'
 
 export default class Produto extends BaseModel {
-  public static table = 'adicionais'
   @column({ isPrimary: true })
   public id: number
 
