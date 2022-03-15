@@ -26,6 +26,9 @@ export default class Movimentacao extends BaseModel {
   @column()
   public origem: string
 
+  @column.date({ autoCreate: true })
+  public data: DateTime
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

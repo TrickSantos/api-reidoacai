@@ -18,7 +18,7 @@ export default class CaixasController {
         }
         if (data) {
           let parse = DateTime.fromFormat(data, 'yyyy-MM-dd')
-          builder.whereRaw(`created_at::date = date '${parse.toSQLDate()}'`)
+          builder.whereRaw(`data::date = '${parse.toSQLDate()}'`)
         }
         builder.where({ empresaId: user?.empresaId })
       })
@@ -62,6 +62,7 @@ export default class CaixasController {
           const movimentacao = await Movimentacao.create({
             ...data,
             empresaId: user?.empresaId,
+            createdBy: user.id,
           })
           return response.status(200).send(movimentacao)
         })

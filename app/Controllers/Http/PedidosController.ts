@@ -20,6 +20,7 @@ export default class PedidosController {
             builder.where({ empresaId: user.empresaId })
           }
         })
+        .orderBy('id', 'desc')
         .preload('produtos', (query) => {
           query.pivotColumns(['desconto', 'quantidade', 'id'])
           query.preload('unidade')
