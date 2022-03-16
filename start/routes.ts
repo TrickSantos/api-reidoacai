@@ -20,7 +20,7 @@ Route.post('/abrir', 'CaixasController.abrirCaixa').middleware('auth')
 Route.get('/verifica_caixa', 'CaixasController.verificarCaixa').middleware('auth')
 Route.put('/fechar/:id', 'CaixasController.fecharCaixa').middleware('auth')
 Route.put('/reabrir/:id', 'CaixasController.reabrirCaixa').middleware('auth')
-Route.put('/dar_baixa_receber/:id', 'ReceBersController.darBaixa').middleware('auth')
+Route.put('/dar_baixa_receber/:id', 'RecebersController.darBaixa').middleware('auth')
 Route.put('/dar_baixa_pagar/:id', 'PagarController.darBaixa').middleware('auth')
 Route.post('/redefinir', 'AuthController.redefinir').middleware('auth')
 

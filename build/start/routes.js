@@ -24,7 +24,7 @@ Route_1.default.post('/abrir', 'CaixasController.abrirCaixa').middleware('auth')
 Route_1.default.get('/verifica_caixa', 'CaixasController.verificarCaixa').middleware('auth');
 Route_1.default.put('/fechar/:id', 'CaixasController.fecharCaixa').middleware('auth');
 Route_1.default.put('/reabrir/:id', 'CaixasController.reabrirCaixa').middleware('auth');
-Route_1.default.put('/dar_baixa_receber/:id', 'ReceBersController.darBaixa').middleware('auth');
+Route_1.default.put('/dar_baixa_receber/:id', 'RecebersController.darBaixa').middleware('auth');
 Route_1.default.put('/dar_baixa_pagar/:id', 'PagarController.darBaixa').middleware('auth');
 Route_1.default.post('/redefinir', 'AuthController.redefinir').middleware('auth');
 Route_1.default.post('/nova_empresa', 'EmpresasController.store');
