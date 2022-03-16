@@ -1,4 +1,4 @@
-FROM node:14.15.4-alpine
+FROM node:14.19.0-alpine
 WORKDIR /app
 COPY ./build /app
 RUN yarn install --production
@@ -26,5 +26,5 @@ ARG SMTP_PASSWORD=${SMTP_PASSWORD}
 ARG CACHE_VIEWS=${CACHE_VIEWS}
 ARG FRONT_END_URL=${FRONT_END_URL}
 RUN node ace migration:run --force
-RUN node ace db:seed
+
 CMD ["node", "server.js"]
