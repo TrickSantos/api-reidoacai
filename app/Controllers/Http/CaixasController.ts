@@ -111,7 +111,7 @@ export default class CaixasController {
     try {
       await user?.load('cargo')
       if (!user?.cargo.caixa.criar) {
-        return response.status(403).send({ errors: [{ message: 'Permissão negada!' }] })
+        return response.status(403).send({ errors: [{ message: 'Permissão negada' }] })
       }
       await Caixa.create({
         empresaId: user?.empresaId,
