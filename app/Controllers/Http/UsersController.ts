@@ -89,12 +89,12 @@ export default class UsersController {
             ]),
             email: schema.string.optional({ trim: true }, [
               rules.email(),
-              rules.unique({ table: 'users', column: 'email' }),
+              rules.unique({ table: 'users', column: 'email', whereNot: { id: params.id } }),
             ]),
             password: schema.string.optional(),
             nome: schema.string.optional(),
             cpf: schema.string.optional({}, [
-              rules.unique({ table: 'users', column: 'cpf', where: { id: params.id } }),
+              rules.unique({ table: 'users', column: 'cpf', whereNot: { id: params.id } }),
             ]),
             cargoId: schema.number.optional([
               rules.exists({

@@ -91,12 +91,12 @@ class UsersController {
                     ]),
                     email: Validator_1.schema.string.optional({ trim: true }, [
                         Validator_1.rules.email(),
-                        Validator_1.rules.unique({ table: 'users', column: 'email' }),
+                        Validator_1.rules.unique({ table: 'users', column: 'email', whereNot: { id: params.id } }),
                     ]),
                     password: Validator_1.schema.string.optional(),
                     nome: Validator_1.schema.string.optional(),
                     cpf: Validator_1.schema.string.optional({}, [
-                        Validator_1.rules.unique({ table: 'users', column: 'cpf', where: { id: params.id } }),
+                        Validator_1.rules.unique({ table: 'users', column: 'cpf', whereNot: { id: params.id } }),
                     ]),
                     cargoId: Validator_1.schema.number.optional([
                         Validator_1.rules.exists({
