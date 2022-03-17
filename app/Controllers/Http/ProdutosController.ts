@@ -30,12 +30,11 @@ export default class ProdutosController {
           schema: schema.create({
             unidadeId: schema.number([rules.exists({ table: 'unidades', column: 'id' })]),
             nome: schema.string(),
-            descricao: schema.string(),
+            descricao: schema.string.optional(),
             valor: schema.number(),
           }),
           messages: {
             'nome.required': 'O produto precisa ser informado',
-            'descricao.required': 'A descrição do produto precisa ser informada',
             'unidadeId.required': 'A unidade precisa ser informada',
             'valor.required': 'O valor precisa ser informado',
           },
