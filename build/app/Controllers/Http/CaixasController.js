@@ -120,7 +120,6 @@ class CaixasController {
             }
             await Caixa_1.default.create({
                 empresaId: user?.empresaId,
-                data: luxon_1.DateTime.now(),
                 valor: 0,
                 status: true,
             }).then((caixa) => response.status(200).send(caixa));

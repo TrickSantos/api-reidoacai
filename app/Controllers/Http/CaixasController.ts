@@ -115,7 +115,6 @@ export default class CaixasController {
       }
       await Caixa.create({
         empresaId: user?.empresaId,
-        data: DateTime.now(),
         valor: 0,
         status: true,
       }).then((caixa) => response.status(200).send(caixa))

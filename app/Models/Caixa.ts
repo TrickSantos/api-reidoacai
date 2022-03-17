@@ -11,7 +11,7 @@ export default class Caixa extends BaseModel {
   @column()
   public valor: number
 
-  @column.date()
+  @column.date({ autoCreate: true })
   public data: DateTime
 
   @column()

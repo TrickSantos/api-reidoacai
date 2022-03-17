@@ -26,7 +26,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Caixa.prototype, "valor", void 0);
 __decorate([
-    Orm_1.column.date(),
+    Orm_1.column.date({ autoCreate: true }),
     __metadata("design:type", luxon_1.DateTime)
 ], Caixa.prototype, "data", void 0);
 __decorate([
