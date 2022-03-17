@@ -21,6 +21,15 @@ const databaseConfig = {
             },
             healthCheck: false,
             debug: false,
+            pool: {
+                min: 0,
+                max: 10,
+                afterCreate: (conn, cb) => {
+                    conn.query("SET TIMEZONE = 'America/Cuiaba';", function (err) {
+                        cb(err, conn);
+                    });
+                },
+            },
         },
     },
 };
