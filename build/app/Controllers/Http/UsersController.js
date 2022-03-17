@@ -96,7 +96,7 @@ class UsersController {
                     password: Validator_1.schema.string.optional(),
                     nome: Validator_1.schema.string.optional(),
                     cpf: Validator_1.schema.string.optional({}, [
-                        Validator_1.rules.unique({ table: 'users', column: 'cpf', whereNot: { id: params.id } }),
+                        Validator_1.rules.unique({ table: 'users', column: 'cpf', where: { id: params.id } }),
                     ]),
                     cargoId: Validator_1.schema.number.optional([
                         Validator_1.rules.exists({
@@ -117,6 +117,7 @@ class UsersController {
                     'password.required': 'A senha precisa ser informada',
                     'nome.required': 'O nome precisa ser informado',
                     'cpf.required': 'O CPF precisa ser informado',
+                    'cpf.unique': 'CPF já cadastrado',
                     'cargoId.exists': 'O cargo não foi encontrado',
                     'image.file.extnames': 'A imagem precisa estar em um formato permitido',
                     'image.file.size': 'A imagem precisa ser menor que 10mb',

@@ -94,7 +94,7 @@ export default class UsersController {
             password: schema.string.optional(),
             nome: schema.string.optional(),
             cpf: schema.string.optional({}, [
-              rules.unique({ table: 'users', column: 'cpf', whereNot: { id: params.id } }),
+              rules.unique({ table: 'users', column: 'cpf', where: { id: params.id } }),
             ]),
             cargoId: schema.number.optional([
               rules.exists({
@@ -115,6 +115,7 @@ export default class UsersController {
             'password.required': 'A senha precisa ser informada',
             'nome.required': 'O nome precisa ser informado',
             'cpf.required': 'O CPF precisa ser informado',
+            'cpf.unique': 'CPF já cadastrado',
             'cargoId.exists': 'O cargo não foi encontrado',
             'image.file.extnames': 'A imagem precisa estar em um formato permitido',
             'image.file.size': 'A imagem precisa ser menor que 10mb',
