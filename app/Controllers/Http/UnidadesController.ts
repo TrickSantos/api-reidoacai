@@ -36,11 +36,9 @@ export default class UnidadesController {
         .validate({
           schema: schema.create({
             unidade: schema.string(),
-            nomenclatura: schema.string(),
           }),
           messages: {
             'unidade.required': 'O nome precisa ser informado',
-            'nomenclatura.required': 'A nomenclatura precisa ser informada',
           },
         })
         .then(async (data) => {
@@ -67,7 +65,6 @@ export default class UnidadesController {
         .validate({
           schema: schema.create({
             unidade: schema.string.optional(),
-            nomenclatura: schema.string.optional(),
           }),
         })
         .then(async (data) => {

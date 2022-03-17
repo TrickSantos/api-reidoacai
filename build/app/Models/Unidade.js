@@ -26,10 +26,6 @@ __decorate([
     __metadata("design:type", String)
 ], Unidade.prototype, "unidade", void 0);
 __decorate([
-    Orm_1.column(),
-    __metadata("design:type", String)
-], Unidade.prototype, "nomenclatura", void 0);
-__decorate([
     Orm_1.column.dateTime({ autoCreate: true }),
     __metadata("design:type", luxon_1.DateTime)
 ], Unidade.prototype, "createdAt", void 0);

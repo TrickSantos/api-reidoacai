@@ -11,9 +11,6 @@ export default class Unidade extends BaseModel {
   @column()
   public unidade: string
 
-  @column()
-  public nomenclatura: string
-
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

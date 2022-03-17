@@ -118,13 +118,15 @@ class CaixasController {
             if (!user?.cargo.caixa.criar) {
                 return response.status(403).send({ errors: [{ message: 'Permissão negada' }] });
             }
-            await Caixa_1.default.create({
+            await Caixa_1.default.updateOrCreate({
+                data: luxon_1.DateTime.now().setZone('UTC-4'),
+            }, {
                 empresaId: user?.empresaId,
-                valor: 0,
                 status: true,
             }).then((caixa) => response.status(200).send(caixa));
         }
         catch (error) {
+            console.log(error);
             return response.status(500).send({ errors: [{ message: error.message }] });
         }
     }

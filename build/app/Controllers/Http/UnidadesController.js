@@ -40,11 +40,9 @@ class UnidadesController {
                 .validate({
                 schema: Validator_1.schema.create({
                     unidade: Validator_1.schema.string(),
-                    nomenclatura: Validator_1.schema.string(),
                 }),
                 messages: {
                     'unidade.required': 'O nome precisa ser informado',
-                    'nomenclatura.required': 'A nomenclatura precisa ser informada',
                 },
             })
                 .then(async (data) => {
@@ -70,7 +68,6 @@ class UnidadesController {
                 .validate({
                 schema: Validator_1.schema.create({
                     unidade: Validator_1.schema.string.optional(),
-                    nomenclatura: Validator_1.schema.string.optional(),
                 }),
             })
                 .then(async (data) => {

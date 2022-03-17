@@ -113,12 +113,17 @@ export default class CaixasController {
       if (!user?.cargo.caixa.criar) {
         return response.status(403).send({ errors: [{ message: 'Permissão negada' }] })
       }
-      await Caixa.create({
-        empresaId: user?.empresaId,
-        valor: 0,
-        status: true,
-      }).then((caixa) => response.status(200).send(caixa))
+      await Caixa.updateOrCreate(
+        {
+          data: DateTime.now().setZone('UTC-4'),
+        },
+        {
+          empresaId: user?.empresaId,
+          status: true,
+        }
+      ).then((caixa) => response.status(200).send(caixa))
     } catch (error) {
+      console.log(error)
       return response.status(500).send({ errors: [{ message: error.message }] })
     }
   }
