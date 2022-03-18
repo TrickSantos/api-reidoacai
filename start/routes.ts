@@ -26,6 +26,8 @@ Route.post('/redefinir', 'AuthController.redefinir').middleware('auth')
 
 Route.post('/nova_empresa', 'EmpresasController.store')
 
+Route.get('/dashboard', 'DashboardController.index').middleware('auth')
+
 Route.post('/login', 'AuthController.login')
 Route.post('/logout', 'AuthController.logout')
 Route.post('/recuperar', 'AuthController.recuperar')

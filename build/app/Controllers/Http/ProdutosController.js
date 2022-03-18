@@ -34,12 +34,11 @@ class ProdutosController {
                 schema: Validator_1.schema.create({
                     unidadeId: Validator_1.schema.number([Validator_1.rules.exists({ table: 'unidades', column: 'id' })]),
                     nome: Validator_1.schema.string(),
-                    descricao: Validator_1.schema.string(),
+                    descricao: Validator_1.schema.string.optional(),
                     valor: Validator_1.schema.number(),
                 }),
                 messages: {
                     'nome.required': 'O produto precisa ser informado',
-                    'descricao.required': 'A descrição do produto precisa ser informada',
                     'unidadeId.required': 'A unidade precisa ser informada',
                     'valor.required': 'O valor precisa ser informado',
                 },

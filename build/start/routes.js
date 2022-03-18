@@ -28,6 +28,7 @@ Route_1.default.put('/dar_baixa_receber/:id', 'RecebersController.darBaixa').mid
 Route_1.default.put('/dar_baixa_pagar/:id', 'PagarController.darBaixa').middleware('auth');
 Route_1.default.post('/redefinir', 'AuthController.redefinir').middleware('auth');
 Route_1.default.post('/nova_empresa', 'EmpresasController.store');
+Route_1.default.get('/dashboard', 'DashboardController.index').middleware('auth');
 Route_1.default.post('/login', 'AuthController.login');
 Route_1.default.post('/logout', 'AuthController.logout');
 Route_1.default.post('/recuperar', 'AuthController.recuperar');
